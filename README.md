@@ -1,9 +1,8 @@
 # Segment Anything at Home
 
-This project is fork of  **[Segment Anything Model](https://segment-anything.com/)** by Meta. The UI is based on [Gradio](https://gradio.app/). 
+This project is fork of [Segment Anything WebUI](https://github.com/5663015/segment_anything_webui) which uses  **[Segment Anything Model](https://segment-anything.com/)** by Meta. The UI is based on [Gradio](https://gradio.app/). 
 
-- Try deme on HF: [AIBoy1993/segment_anything_webui](https://huggingface.co/spaces/AIBoy1993/segment_anything_webui)
-- [GitHub](https://github.com/5663015/segment_anything_webui)
+
 
 ![sam-home-demo-screenshot](./images/sam-home-screenshot.png)
 
