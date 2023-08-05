@@ -92,12 +92,12 @@ with gr.Blocks() as demo:
 
       model_type.change(
           get_sam_predictor,
-          [model_type, device],
+          [model_type, device, original_image],
           [predictor]
       )
       device.change(
           get_sam_predictor,
-          [model_type, device],
+          [model_type, device, original_image],
           [predictor]
       )
 

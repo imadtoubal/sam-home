@@ -11,8 +11,7 @@ models = {
 }
 
 
-def get_sam_predictor(model_type='vit_h', device=None):
-  print(f"Update model to {model_type} on {device}")
+def get_sam_predictor(model_type='vit_h', device=None, image=None):
   if device is None and torch.cuda.is_available():
     device = 'cuda'
   elif device is None:
@@ -20,14 +19,17 @@ def get_sam_predictor(model_type='vit_h', device=None):
   # sam model
   sam = sam_model_registry[model_type](checkpoint=models[model_type])
   sam = sam.to(device)
-  return SamPredictor(sam)
+
+  predictor = SamPredictor(sam)
+  if image is not None:
+    predictor.set_image(image)
+  return predictor
 
 
 def run_inference(predictor: SamPredictor, input_x, selected_points,
                   multi_object: bool = False):
   # Process the image to produce an image embedding
   # points
-  print('prompt points length: ', len(selected_points))
   points = torch.Tensor(
       [p for p, _ in selected_points]
   ).to(predictor.device).unsqueeze(1)
