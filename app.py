@@ -71,7 +71,7 @@ def undo_points(predictor, orig_img, multi_object, sel_pix):
 def reset_image(predictor, img):
   # when new image is uploaded, `selected_points` should be empty
   predictor.set_image(img)
-  return img, [], (img, [])
+  return img, img, [], (img, [])
 
 
 with gr.Blocks() as demo:
@@ -143,7 +143,7 @@ with gr.Blocks() as demo:
   input_image.upload(
       reset_image,
       [predictor, input_image],
-      [original_image, selected_points, output_mask]
+      [original_image, input_image, selected_points, output_mask]
   )
 
   undo_button.click(
