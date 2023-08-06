@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 import cv2
@@ -31,7 +32,6 @@ def select_point(predictor: SamPredictor,
       np.ndarray: Image with mask.
       np.ndarray: Mask.
   """
-  print(multi_object)
   img = original_img.copy()
   if point_type == 'foreground_point':
     sel_pix.append((evt.index, 1))   # append the foreground_point
@@ -45,7 +45,13 @@ def select_point(predictor: SamPredictor,
   for point, label in sel_pix:
     cv2.drawMarker(img, point, COLORS[label], markerType=MARKERS[label],
                    markerSize=5, thickness=2)
-  return img, (img, o_masks)
+  o_files = []
+  for mask, name in o_masks:
+    o_mask = np.uint8(mask * 255)
+    o_file = os.path.join('temp', name) + '.png'
+    cv2.imwrite(o_file, o_mask)
+    o_files.append(o_file)
+  return img, (img, o_masks), o_files
 
 
 # undo the selected point
@@ -127,7 +133,12 @@ with gr.Blocks() as demo:
                   'Default: `foreground_point`.')
 
     # show only mask
-    output_mask = gr.AnnotatedImage(show_progress='minimal')
+    with gr.Column():
+      output_mask = gr.AnnotatedImage(show_progress='minimal')
+      output_file = gr.File(
+          label='Save output mask',
+          interactive=False,
+          description='Save output mask to local file system.')
 
   input_image.upload(
       reset_image,
@@ -144,12 +155,7 @@ with gr.Blocks() as demo:
   input_image.select(
       select_point,
       [predictor, original_image, multi_object, selected_points, fg_bg_radio],
-      [input_image, output_mask])
-
-  multi_object.change(
-      select_point,
-      [predictor, original_image, multi_object, selected_points, fg_bg_radio],
-      [input_image, output_mask])
+      [input_image, output_mask, output_file])
 
 
 demo.queue().launch(debug=True, enable_queue=True)

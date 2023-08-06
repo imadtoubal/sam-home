@@ -53,5 +53,5 @@ def run_inference(predictor: SamPredictor, input_x, selected_points,
     masks: np.ndarray = masks.max(axis=0, keepdims=True)
   gc.collect()
   torch.cuda.empty_cache()
-
+  
   return [(mask, f'mask_{i}') for i, mask in enumerate(masks)]
