@@ -30,6 +30,10 @@ def run_inference(predictor: SamPredictor, input_x, selected_points,
                   multi_object: bool = False):
   # Process the image to produce an image embedding
   # points
+  # fg_points = [p for p, l in selected_points if l == 1]
+  # bg_points = [p for p, l in selected_points if l == 0]
+  if len(selected_points) == 0:
+    return []
   points = torch.Tensor(
       [p for p, _ in selected_points]
   ).to(predictor.device).unsqueeze(1)
@@ -48,10 +52,21 @@ def run_inference(predictor: SamPredictor, input_x, selected_points,
     multimask_output=True,
   )
 
-  masks = masks[labels[:, 0] == 1, 0].cpu().detach().numpy()
+  masks = masks[:, torch.argmax(scores, dim=1)]
+  masks_pos = masks[labels[:, 0] == 1, 0].cpu().detach().numpy()
+  masks_neg = masks[labels[:, 0] == 0, 0].cpu().detach().numpy()
   if not multi_object:
-    masks: np.ndarray = masks.max(axis=0, keepdims=True)
+    if len(masks_neg) == 0:
+      masks_neg = np.zeros_like(masks_pos)
+    if len(masks_pos) == 0:
+      masks_pos = np.zeros_like(masks_neg)
+    masks_neg = masks_neg.max(axis=0, keepdims=True)
+    masks_pos = masks_pos.max(axis=0, keepdims=True)
+    # TODO(itdfh): When a negative mask is too small, this becomes a problem.
+    masks = (masks_pos.astype(int) - masks_neg.astype(int)).clip(0, 1)
+  else:
+    masks = np.concatenate([masks_pos, masks_neg], axis=0)
   gc.collect()
   torch.cuda.empty_cache()
-  
+
   return [(mask, f'mask_{i}') for i, mask in enumerate(masks)]
